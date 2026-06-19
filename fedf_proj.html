@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LuxeStay — Hotel Dining</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-light:#E8D08A;--gold-dark:#9A7A2E;
+  --cream:#FBF8F2;--cream2:#F4EFE4;--cream3:#EDE6D6;
+  --dark:#1A1612;--dark2:#2C2520;--dark3:#3D3530;
+  --text:#2C2520;--text2:#6B5F52;--text3:#9A8E82;
+  --white:#FFFFFF;--error:#C0392B;--success:#27AE60;
+  --shadow:0 4px 24px rgba(26,22,18,0.1);
+  --shadow-lg:0 8px 48px rgba(26,22,18,0.15);
+  --radius:8px;--radius-lg:16px;
+  font-family:'DM Sans',sans-serif;
+}
+body{background:var(--cream);color:var(--text);min-height:100vh;}
+#app{min-height:100vh;}
+
+/* LAYOUT */
+.navbar{background:var(--dark);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:70px;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.3);}
+.navbar-brand{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;color:var(--gold);letter-spacing:0.08em;cursor:pointer;}
+.navbar-brand span{font-style:italic;}
+.navbar-links{display:flex;align-items:center;gap:0.5rem;}
+.nav-btn{background:none;border:none;color:var(--cream3);cursor:pointer;padding:0.5rem 1rem;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:0.875rem;transition:all 0.2s;display:flex;align-items:center;gap:0.4rem;}
+.nav-btn:hover{color:var(--gold);background:rgba(201,168,76,0.1);}
+.nav-btn.active{color:var(--gold);}
+.cart-badge{background:var(--gold);color:var(--dark);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:500;}
+.nav-user{color:var(--gold-light);font-size:0.8rem;padding:0.4rem 0.8rem;background:rgba(201,168,76,0.15);border-radius:20px;border:1px solid rgba(201,168,76,0.3);}
+
+/* PAGES */
+.page{min-height:calc(100vh - 70px);padding:2rem;}
+.page-hero{background:linear-gradient(135deg,var(--dark) 0%,var(--dark2) 100%);padding:4rem 2rem;text-align:center;position:relative;overflow:hidden;}
+.page-hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A84C' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:3.5rem;font-weight:300;color:var(--white);line-height:1.1;position:relative;}
+.hero-title em{color:var(--gold);font-style:italic;}
+.hero-sub{color:var(--cream3);margin-top:0.75rem;font-size:1rem;font-weight:300;position:relative;}
+.hero-divider{width:60px;height:1px;background:var(--gold);margin:1.5rem auto;position:relative;}
+
+/* CARDS */
+.card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;max-width:1200px;margin:0 auto;}
+
+/* FOOD CARD */
+.food-card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+.food-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+.food-card-img{height:180px;display:flex;align-items:center;justify-content:center;font-size:4rem;position:relative;}
+.food-card-badge{position:absolute;top:12px;right:12px;background:var(--gold);color:var(--dark);font-size:0.7rem;font-weight:500;padding:3px 8px;border-radius:20px;}
+.food-card-body{padding:1.25rem;}
+.food-card-cat{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:0.25rem;}
+.food-card-name{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:400;color:var(--dark);margin-bottom:0.4rem;}
+.food-card-desc{font-size:0.82rem;color:var(--text2);line-height:1.5;margin-bottom:1rem;}
+.food-card-footer{display:flex;align-items:center;justify-content:space-between;}
+.food-price{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--gold-dark);}
+.food-price sup{font-size:0.8rem;vertical-align:super;}
+
+/* BUTTONS */
+.btn{cursor:pointer;border:none;font-family:'DM Sans',sans-serif;font-size:0.875rem;font-weight:500;border-radius:var(--radius);padding:0.6rem 1.25rem;transition:all 0.2s;}
+.btn-primary{background:var(--gold);color:var(--dark);}
+.btn-primary:hover{background:var(--gold-dark);color:var(--white);}
+.btn-outline{background:none;border:1px solid var(--gold);color:var(--gold-dark);}
+.btn-outline:hover{background:var(--gold);color:var(--dark);}
+.btn-dark{background:var(--dark);color:var(--cream);}
+.btn-dark:hover{background:var(--dark2);}
+.btn-sm{padding:0.4rem 0.9rem;font-size:0.8rem;}
+.btn-icon{padding:0.5rem;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;}
+
+/* FORMS */
+.form-group{margin-bottom:1.25rem;}
+.form-label{display:block;font-size:0.82rem;font-weight:500;color:var(--text2);margin-bottom:0.4rem;letter-spacing:0.02em;}
+.form-input{width:100%;padding:0.7rem 1rem;border:1px solid var(--cream3);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--text);background:var(--cream);transition:border-color 0.2s;}
+.form-input:focus{outline:none;border-color:var(--gold);background:var(--white);}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239A8E82' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+
+/* AUTH */
+.auth-wrap{min-height:calc(100vh - 70px);display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--cream2);}
+.auth-card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:2.5rem;width:100%;max-width:420px;}
+.auth-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--dark);margin-bottom:0.25rem;}
+.auth-sub{font-size:0.85rem;color:var(--text3);margin-bottom:2rem;}
+.auth-divider{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;color:var(--text3);font-size:0.8rem;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--cream3);}
+.auth-link{color:var(--gold-dark);cursor:pointer;font-size:0.875rem;}
+.auth-link:hover{text-decoration:underline;}
+.error-msg{background:#ffeaea;color:var(--error);padding:0.6rem 0.9rem;border-radius:var(--radius);font-size:0.82rem;margin-bottom:1rem;border-left:3px solid var(--error);}
+.success-msg{background:#eafaf1;color:var(--success);padding:0.6rem 0.9rem;border-radius:var(--radius);font-size:0.82rem;margin-bottom:1rem;border-left:3px solid var(--success);}
+
+/* MENU */
+.menu-filters{display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:2rem;max-width:1200px;margin-left:auto;margin-right:auto;}
+.filter-btn{padding:0.5rem 1.25rem;border-radius:20px;border:1px solid var(--cream3);background:var(--white);color:var(--text2);cursor:pointer;font-size:0.85rem;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.filter-btn:hover,.filter-btn.active{background:var(--gold);color:var(--dark);border-color:var(--gold);}
+
+/* CART */
+.cart-page{max-width:900px;margin:0 auto;}
+.cart-item{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;border-bottom:1px solid var(--cream3);}
+.cart-item-emoji{font-size:2.5rem;width:60px;text-align:center;}
+.cart-item-info{flex:1;}
+.cart-item-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:400;color:var(--dark);}
+.cart-item-price{font-size:0.85rem;color:var(--text3);}
+.qty-control{display:flex;align-items:center;gap:0.5rem;}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--cream3);background:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s;}
+.qty-btn:hover{border-color:var(--gold);background:var(--gold);color:var(--dark);}
+.qty-num{min-width:24px;text-align:center;font-weight:500;}
+.cart-item-total{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;color:var(--gold-dark);min-width:70px;text-align:right;}
+.cart-summary{background:var(--dark);color:var(--cream);border-radius:var(--radius-lg);padding:1.5rem;margin-top:1.5rem;}
+.cart-summary-row{display:flex;justify-content:space-between;padding:0.4rem 0;font-size:0.9rem;}
+.cart-summary-total{border-top:1px solid rgba(255,255,255,0.15);margin-top:0.75rem;padding-top:0.75rem;font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;}
+.cart-summary-total span:last-child{color:var(--gold);}
+.empty-state{text-align:center;padding:4rem 2rem;}
+.empty-icon{font-size:4rem;margin-bottom:1rem;}
+.empty-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--dark);margin-bottom:0.5rem;}
+.empty-sub{color:var(--text3);margin-bottom:1.5rem;}
+
+/* ORDERS */
+.order-card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:1.25rem;margin-bottom:1rem;max-width:900px;margin-left:auto;margin-right:auto;}
+.order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
+.order-id{font-size:0.82rem;color:var(--text3);}
+.order-status{padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:500;}
+.status-pending{background:#FFF3CD;color:#856404;}
+.status-preparing{background:#CCE5FF;color:#004085;}
+.status-ready{background:#D4EDDA;color:#155724;}
+.status-delivered{background:#E8D5B7;color:#6C4A1F;}
+.order-items{font-size:0.85rem;color:var(--text2);margin-bottom:0.5rem;}
+.order-footer{display:flex;justify-content:space-between;align-items:center;}
+.order-total{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold-dark);}
+.order-time{font-size:0.78rem;color:var(--text3);}
+
+/* ADMIN */
+.admin-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 70px);}
+.admin-sidebar{background:var(--dark2);padding:1.5rem 0;}
+.admin-sidebar-title{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--text3);padding:0 1.25rem;margin-bottom:0.75rem;}
+.sidebar-link{display:flex;align-items:center;gap:0.6rem;padding:0.7rem 1.25rem;color:var(--cream3);cursor:pointer;font-size:0.875rem;transition:all 0.2s;border-left:3px solid transparent;}
+.sidebar-link:hover{background:rgba(201,168,76,0.08);color:var(--gold-light);}
+.sidebar-link.active{background:rgba(201,168,76,0.12);color:var(--gold);border-left-color:var(--gold);}
+.admin-content{background:var(--cream);padding:2rem;}
+.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.stat-card{background:var(--white);border-radius:var(--radius-lg);padding:1.25rem;box-shadow:var(--shadow);}
+.stat-label{font-size:0.78rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem;}
+.stat-value{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:var(--dark);}
+.stat-sub{font-size:0.78rem;color:var(--success);margin-top:0.2rem;}
+.admin-table{width:100%;border-collapse:collapse;background:var(--white);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow);}
+.admin-table th{background:var(--dark);color:var(--gold-light);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.9rem 1rem;text-align:left;font-weight:400;}
+.admin-table td{padding:0.9rem 1rem;font-size:0.875rem;border-bottom:1px solid var(--cream3);color:var(--text);}
+.admin-table tr:last-child td{border-bottom:none;}
+.admin-table tr:hover td{background:var(--cream);}
+select.status-select{padding:4px 8px;border-radius:20px;border:1px solid var(--cream3);font-size:0.78rem;background:var(--cream);cursor:pointer;}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem;}
+.toast{background:var(--dark);color:var(--cream);padding:0.75rem 1.25rem;border-radius:var(--radius);font-size:0.875rem;box-shadow:var(--shadow-lg);border-left:3px solid var(--gold);animation:slideUp 0.3s ease;min-width:250px;}
+.toast.error{border-left-color:var(--error);}
+.toast.success{border-left-color:var(--success);}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,22,18,0.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;}
+.modal{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);max-width:480px;width:100%;padding:2rem;max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;margin-bottom:0.25rem;}
+.modal-close{float:right;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text3);margin-top:-0.5rem;}
+
+/* TAGS */
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:500;}
+.tag-veg{background:#eafaf1;color:#27AE60;}
+.tag-nonveg{background:#fdecea;color:#C0392B;}
+.tag-popular{background:#fff8e7;color:#F39C12;}
+
+/* PAGE SECTIONS */
+.section{max-width:1200px;margin:0 auto;padding:2rem 0;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--dark);margin-bottom:0.25rem;}
+.section-line{width:40px;height:2px;background:var(--gold);margin-bottom:1.5rem;}
+.room-info-bar{background:var(--dark2);color:var(--cream3);text-align:center;padding:0.6rem;font-size:0.82rem;}
+.room-info-bar span{color:var(--gold);}
+
+/* MISC */
+.flex{display:flex;} .flex-col{flex-direction:column;} .items-center{align-items:center;} .justify-between{justify-content:space-between;} .gap-1{gap:0.5rem;} .gap-2{gap:1rem;} .mt-1{margin-top:0.5rem;} .mt-2{margin-top:1rem;} .mt-3{margin-top:1.5rem;} .mb-1{margin-bottom:0.5rem;} .mb-2{margin-bottom:1rem;} .text-sm{font-size:0.85rem;} .text-xs{font-size:0.78rem;} .text-muted{color:var(--text3);} .fw-500{font-weight:500;} .text-center{text-align:center;}
+.w-full{width:100%;}
+@media(max-width:768px){.admin-layout{grid-template-columns:1fr}.admin-sidebar{display:none}.admin-stats{grid-template-columns:repeat(2,1fr)}.hero-title{font-size:2.2rem}.card-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script>
+const {useState,useEffect,useCallback,createContext,useContext,useRef}=React;
+const h=React.createElement;
+
+/* ---- DATA ---- */
+const MENU=[
+  {id:1,name:'Truffle Mushroom Risotto',cat:'Mains',emoji:'🍚',price:24,desc:'Arborio rice with wild mushrooms, aged parmesan and black truffle oil',veg:true,popular:true,bg:'#F5F0E8'},
+  {id:2,name:'Grilled Atlantic Salmon',cat:'Mains',emoji:'🐟',price:32,desc:'Pan-seared salmon with lemon butter, capers and seasonal greens',veg:false,popular:true,bg:'#EEF5F0'},
+  {id:3,name:'Continental Breakfast',cat:'Breakfast',emoji:'🥐',price:18,desc:'Assorted pastries, fresh fruit, yogurt parfait and freshly squeezed juice',veg:true,popular:false,bg:'#FFF8EC'},
+  {id:4,name:'Eggs Benedict',cat:'Breakfast',emoji:'🍳',price:16,desc:'Poached eggs on toasted brioche with hollandaise sauce and smoked salmon',veg:false,popular:true,bg:'#FFF0E8'},
+  {id:5,name:'Garden Salad',cat:'Starters',emoji:'🥗',price:12,desc:'Mixed greens, cherry tomatoes, cucumber and house vinaigrette',veg:true,popular:false,bg:'#EDFFF2'},
+  {id:6,name:'Prawn Cocktail',cat:'Starters',emoji:'🍤',price:16,desc:'Chilled tiger prawns with Marie Rose sauce and lemon wedge',veg:false,popular:false,bg:'#FFF0F8'},
+  {id:7,name:'Chocolate Lava Cake',cat:'Desserts',emoji:'🍫',price:10,desc:'Warm dark chocolate fondant with vanilla ice cream and berry coulis',veg:true,popular:true,bg:'#F8ECEC'},
+  {id:8,name:'Mango Panna Cotta',cat:'Desserts',emoji:'🥭',price:9,desc:'Italian cream dessert with fresh mango coulis and mint',veg:true,popular:false,bg:'#FFF8E8'},
+  {id:9,name:'Classic Club Sandwich',cat:'Snacks',emoji:'🥪',price:14,desc:'Triple-decker sandwich with grilled chicken, bacon, lettuce and tomato',veg:false,popular:false,bg:'#F5F5E8'},
+  {id:10,name:'Masala Chai',cat:'Beverages',emoji:'🍵',price:5,desc:'Aromatic spiced tea with ginger, cardamom and fresh milk',veg:true,popular:true,bg:'#FFF3E8'},
+  {id:11,name:'Fresh Lime Soda',cat:'Beverages',emoji:'🍋',price:4,desc:'Freshly squeezed lime with soda water and a pinch of salt',veg:true,popular:false,bg:'#EFFFEC'},
+  {id:12,name:'Lobster Bisque',cat:'Starters',emoji:'🦞',price:22,desc:'Rich creamy soup with fresh lobster, cognac and herbed croutons',veg:false,popular:true,bg:'#FFECE8'},
+];
+const CATS=['All','Breakfast','Starters','Mains','Desserts','Beverages','Snacks'];
+const initOrders=[
+  {id:'ORD-001',userId:2,room:'204',items:[{name:'Truffle Mushroom Risotto',qty:1,price:24},{name:'Masala Chai',qty:2,price:5}],total:34,status:'delivered',time:'2024-01-15 08:32'},
+  {id:'ORD-002',userId:2,room:'204',items:[{name:'Grilled Atlantic Salmon',qty:1,price:32}],total:32,status:'preparing',time:'2024-01-15 12:10'},
+  {id:'ORD-003',userId:3,room:'312',items:[{name:'Continental Breakfast',qty:2,price:18},{name:'Fresh Lime Soda',qty:1,price:4}],total:40,status:'ready',time:'2024-01-15 07:55'},
+];
+const initUsers=[
+  {id:1,name:'Admin Staff',email:'admin@luxestay.com',password:'admin123',role:'admin',room:null},
+  {id:2,name:'James Mitchell',email:'james@guest.com',password:'guest123',role:'guest',room:'204'},
+  {id:3,name:'Priya Sharma',email:'priya@guest.com',password:'guest123',role:'guest',room:'312'},
+];
+
+/* ---- STORE ---- */
+const AppCtx=createContext(null);
+function useApp(){return useContext(AppCtx);}
+
+function AppProvider({children}){
+  const[user,setUser]=useState(null);
+  const[cart,setCart]=useState([]);
+  const[orders,setOrders]=useState(initOrders);
+  const[users,setUsers]=useState(initUsers);
+  const[page,setPage]=useState('home');
+  const[toasts,setToasts]=useState([]);
+  const toastId=useRef(0);
+
+  function toast(msg,type='info'){
+    const id=++toastId.current;
+    setToasts(t=>[...t,{id,msg,type}]);
+    setTimeout(()=>setToasts(t=>t.filter(x=>x.id!==id)),3000);
+  }
+  function login(email,password){
+    const u=users.find(u=>u.email===email&&u.password===password);
+    if(!u){return false;}
+    setUser(u);
+    setPage(u.role==='admin'?'admin':'home');
+    toast(`Welcome back, ${u.name.split(' ')[0]}!`,'success');
+    return true;
+  }
+  function register(name,email,password,room){
+    if(users.find(u=>u.email===email)){return{ok:false,msg:'Email already registered'};}
+    const nu={id:Date.now(),name,email,password,role:'guest',room};
+    setUsers(u=>[...u,nu]);
+    setUser(nu);
+    setPage('home');
+    toast(`Welcome to LuxeStay, ${name.split(' ')[0]}!`,'success');
+    return{ok:true};
+  }
+  function logout(){setUser(null);setCart([]);setPage('home');toast('Logged out successfully');}
+  function addToCart(item){
+    setCart(c=>{
+      const ex=c.find(x=>x.id===item.id);
+      if(ex)return c.map(x=>x.id===item.id?{...x,qty:x.qty+1}:x);
+      return[...c,{...item,qty:1}];
+    });
+    toast(`${item.name} added to cart`,'success');
+  }
+  function updateQty(id,delta){
+    setCart(c=>{
+      const updated=c.map(x=>x.id===id?{...x,qty:x.qty+delta}:x).filter(x=>x.qty>0);
+      return updated;
+    });
+  }
+  function removeFromCart(id){setCart(c=>c.filter(x=>x.id!==id));}
+  function placeOrder(){
+    if(!user){setPage('login');return;}
+    if(!cart.length){toast('Cart is empty','error');return;}
+    const total=cart.reduce((s,x)=>s+x.price*x.qty,0);
+    const ord={
+      id:'ORD-'+String(orders.length+1).padStart(3,'0'),
+      userId:user.id,room:user.room||'N/A',
+      items:cart.map(x=>({name:x.name,qty:x.qty,price:x.price})),
+      total,status:'pending',time:new Date().toLocaleString('en-IN',{hour12:false}).slice(0,16)
+    };
+    setOrders(o=>[ord,...o]);
+    setCart([]);
+    setPage('orders');
+    toast('Order placed successfully! 🎉','success');
+  }
+  function updateOrderStatus(id,status){
+    setOrders(o=>o.map(x=>x.id===id?{...x,status}:x));
+  }
+  const cartCount=cart.reduce((s,x)=>s+x.qty,0);
+  return h(AppCtx.Provider,{value:{user,cart,orders,users,page,setPage,login,register,logout,addToCart,updateQty,removeFromCart,placeOrder,cartCount,toasts,toast,updateOrderStatus}},children);
+}
+
+/* ---- COMPONENTS ---- */
+function Toast(){
+  const{toasts}=useApp();
+  return h('div',{className:'toast-wrap'},
+    toasts.map(t=>h('div',{key:t.id,className:`toast ${t.type}`},t.msg))
+  );
+}
+
+function Navbar(){
+  const{user,logout,setPage,cartCount,page}=useApp();
+  return h('nav',{className:'navbar'},
+    h('div',{className:'navbar-brand',onClick:()=>setPage('home')},'Luxe',h('span',null,'Stay')),
+    h('div',{className:'navbar-links'},
+      user&&h('button',{className:`nav-btn${page==='menu'?' active':''}`,onClick:()=>setPage('menu')},'Menu'),
+      user&&h('button',{className:`nav-btn${page==='orders'?' active':''}`,onClick:()=>setPage('orders')},'My Orders'),
+      user&&h('button',{className:`nav-btn${page==='cart'?' active':''}`,onClick:()=>setPage('cart')},
+        '🛒 Cart',cartCount>0&&h('span',{className:'cart-badge'},cartCount)
+      ),
+      user&&user.role==='admin'&&h('button',{className:`nav-btn${page==='admin'?' active':''}`,onClick:()=>setPage('admin')},'Admin'),
+      user?h('div',{className:'flex items-center gap-1'},
+        h('span',{className:'nav-user'},user.room?`Room ${user.room}`:user.name.split(' ')[0]),
+        h('button',{className:'nav-btn',onClick:logout},'Sign Out')
+      ):h('div',{className:'flex gap-1'},
+        h('button',{className:'nav-btn',onClick:()=>setPage('login')},'Sign In'),
+        h('button',{className:'btn btn-primary btn-sm',onClick:()=>setPage('register')},'Register')
+      )
+    )
+  );
+}
+
+/* HOME */
+function HomePage(){
+  const{setPage,user}=useApp();
+  return h('div',null,
+    h('div',{className:'page-hero'},
+      h('p',{className:'text-xs',style:{color:'var(--gold)',letterSpacing:'0.2em',textTransform:'uppercase',marginBottom:'1rem'}},'Fine Dining · Room Service'),
+      h('h1',{className:'hero-title'},'Taste the ',h('em',null,'Extraordinary')),
+      h('p',{className:'hero-sub'},'Curated dining experiences delivered to your door'),
+      h('div',{className:'hero-divider'}),
+      h('div',{className:'flex gap-2',style:{justifyContent:'center',flexWrap:'wrap'}},
+        h('button',{className:'btn btn-primary',onClick:()=>setPage(user?'menu':'register')},'Explore Menu'),
+        !user&&h('button',{className:'btn btn-outline',style:{color:'var(--gold-light)',borderColor:'var(--gold)'},onClick:()=>setPage('login')},'Sign In')
+      )
+    ),
+    h('div',{style:{padding:'3rem 2rem',background:'var(--cream2)'}},
+      h('div',{className:'section'},
+        h('p',{style:{fontSize:'0.75rem',textTransform:'uppercase',letterSpacing:'0.15em',color:'var(--text3)',textAlign:'center',marginBottom:'0.5rem'}},'Why Choose Us'),
+        h('h2',{className:'section-title',style:{textAlign:'center',marginBottom:'0.5rem'}},'The LuxeStay Experience'),
+        h('div',{className:'hero-divider',style:{margin:'0.5rem auto 2.5rem'}}),
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:'1.5rem'}},
+          [['🕐','24/7 Service','Order any time, day or night'],['👨‍🍳','Master Chefs','Award-winning culinary team'],['⚡','30 Min Delivery','From kitchen to your room'],['🌿','Fresh Ingredients','Locally sourced, daily fresh']].map(([emoji,title,desc])=>
+            h('div',{key:title,style:{textAlign:'center',padding:'1.5rem',background:'var(--white)',borderRadius:'var(--radius-lg)',boxShadow:'var(--shadow)'}},
+              h('div',{style:{fontSize:'2.5rem',marginBottom:'0.75rem'}},emoji),
+              h('h3',{style:{fontFamily:'Cormorant Garamond,serif',fontSize:'1.2rem',fontWeight:400,marginBottom:'0.4rem'}},title),
+              h('p',{style:{fontSize:'0.82rem',color:'var(--text3)'}},desc)
+            )
+          )
+        )
+      )
+    ),
+    h('div',{style:{padding:'3rem 2rem'}},
+      h('div',{className:'section'},
+        h('h2',{className:'section-title'},'Popular Dishes'),
+        h('div',{className:'section-line'}),
+        h('div',{className:'card-grid'},
+          MENU.filter(x=>x.popular).slice(0,4).map(item=>h(FoodCard,{key:item.id,item}))
+        ),
+        h('div',{style:{textAlign:'center',marginTop:'2rem'}},
+          h('button',{className:'btn btn-outline',onClick:()=>setPage(user?'menu':'register')},'View Full Menu →')
+        )
+      )
+    )
+  );
+}
+
+/* FOOD CARD */
+function FoodCard({item,showAdd=true}){
+  const{addToCart,user,setPage}=useApp();
+  return h('div',{className:'food-card'},
+    h('div',{className:'food-card-img',style:{background:item.bg}},
+      item.emoji,
+      item.popular&&h('span',{className:'food-card-badge'},'Popular')
+    ),
+    h('div',{className:'food-card-body'},
+      h('p',{className:'food-card-cat'},item.cat),
+      h('h3',{className:'food-card-name'},item.name),
+      h('p',{className:'food-card-desc'},item.desc),
+      h('div',{className:'food-card-footer'},
+        h('div',null,
+          h('div',{className:'food-price'},h('sup',null,'₹'),item.price*80),
+          h('span',{className:`tag ${item.veg?'tag-veg':'tag-nonveg'}`,style:{marginTop:'4px',display:'inline-block'}},item.veg?'🌱 Veg':'🍗 Non-veg')
+        ),
+        showAdd&&h('button',{className:'btn btn-primary btn-sm',onClick:()=>user?addToCart(item):setPage('login')},user?'Add to Cart':'Sign In')
+      )
+    )
+  );
+}
+
+/* MENU PAGE */
+function MenuPage(){
+  const[cat,setCat]=useState('All');
+  const[search,setSearch]=useState('');
+  const items=MENU.filter(x=>(cat==='All'||x.cat===cat)&&(x.name.toLowerCase().includes(search.toLowerCase())||x.desc.toLowerCase().includes(search.toLowerCase())));
+  return h('div',null,
+    h('div',{className:'page-hero',style:{padding:'2.5rem 2rem'}},
+      h('h1',{className:'hero-title',style:{fontSize:'2.5rem'}},'Our ',h('em',null,'Menu')),
+      h('p',{className:'hero-sub'},'Discover flavors crafted for the discerning palate'),
+      h('div',{style:{marginTop:'1.5rem',maxWidth:'400px',margin:'1.5rem auto 0'}},
+        h('input',{className:'form-input',placeholder:'Search dishes...',value:search,onChange:e=>setSearch(e.target.value),style:{background:'rgba(255,255,255,0.1)',color:'var(--white)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'30px',textAlign:'center'}})
+      )
+    ),
+    h('div',{style:{padding:'2rem'}},
+      h('div',{className:'menu-filters'},
+        CATS.map(c=>h('button',{key:c,className:`filter-btn${cat===c?' active':''}`,onClick:()=>setCat(c)},c))
+      ),
+      items.length?h('div',{className:'card-grid'},items.map(item=>h(FoodCard,{key:item.id,item}))):
+      h('div',{className:'empty-state'},h('div',{className:'empty-icon'},'🔍'),h('p',{className:'empty-title'},'No dishes found'),h('p',{className:'empty-sub'},'Try a different search or category'))
+    )
+  );
+}
+
+/* CART PAGE */
+function CartPage(){
+  const{cart,updateQty,removeFromCart,placeOrder,user,setPage}=useApp();
+  const subtotal=cart.reduce((s,x)=>s+x.price*80*x.qty,0);
+  const tax=Math.round(subtotal*0.05);
+  const delivery=50;
+  const total=subtotal+tax+delivery;
+  if(!cart.length)return h('div',{className:'page'},h('div',{className:'empty-state'},
+    h('div',{className:'empty-icon'},'🛒'),
+    h('h2',{className:'empty-title'},'Your cart is empty'),
+    h('p',{className:'empty-sub'},'Add some delicious items from our menu'),
+    h('button',{className:'btn btn-primary',onClick:()=>setPage('menu')},'Browse Menu')
+  ));
+  return h('div',{className:'page'},
+    h('div',{className:'cart-page'},
+      h('h2',{className:'section-title'},'Your Order'),
+      h('div',{className:'section-line'}),
+      user&&user.room&&h('p',{className:'text-sm text-muted mb-2'},'Delivering to Room ',h('strong',null,user.room)),
+      h('div',{className:'card',style:{marginBottom:'1rem'}},
+        cart.map(item=>h('div',{key:item.id,className:'cart-item'},
+          h('div',{className:'cart-item-emoji'},item.emoji),
+          h('div',{className:'cart-item-info'},
+            h('div',{className:'cart-item-name'},item.name),
+            h('div',{className:'cart-item-price'},'₹',item.price*80,' each')
+          ),
+          h('div',{className:'qty-control'},
+            h('button',{className:'qty-btn',onClick:()=>updateQty(item.id,-1)},item.qty===1?'🗑':'−'),
+            h('span',{className:'qty-num'},item.qty),
+            h('button',{className:'qty-btn',onClick:()=>updateQty(item.id,1)},'+')
+          ),
+          h('div',{className:'cart-item-total'},'₹',item.price*80*item.qty)
+        ))
+      ),
+      h('div',{className:'cart-summary'},
+        h('div',{className:'cart-summary-row'},h('span',null,'Subtotal'),h('span',null,'₹',subtotal)),
+        h('div',{className:'cart-summary-row'},h('span',null,'GST (5%)'),h('span',null,'₹',tax)),
+        h('div',{className:'cart-summary-row'},h('span',null,'Delivery charge'),h('span',null,'₹',delivery)),
+        h('div',{className:'cart-summary-row cart-summary-total'},h('span',null,'Total'),h('span',null,'₹',total)),
+        h('button',{className:'btn btn-primary w-full',style:{marginTop:'1.25rem',padding:'0.85rem',fontSize:'1rem'},onClick:placeOrder},'Place Order')
+      )
+    )
+  );
+}
+
+/* ORDERS PAGE */
+function OrdersPage(){
+  const{orders,user}=useApp();
+  const myOrders=orders.filter(o=>o.userId===user?.id);
+  const statusColors={pending:'status-pending',preparing:'status-preparing',ready:'status-ready',delivered:'status-delivered'};
+  return h('div',{className:'page'},
+    h('h2',{className:'section-title'},'My Orders'),
+    h('div',{className:'section-line'}),
+    !myOrders.length?h('div',{className:'empty-state'},
+      h('div',{className:'empty-icon'},'📋'),
+      h('h2',{className:'empty-title'},'No orders yet'),
+      h('p',{className:'empty-sub'},'Your order history will appear here')
+    ):myOrders.map(ord=>h('div',{key:ord.id,className:'order-card'},
+      h('div',{className:'order-header'},
+        h('div',null,h('div',{className:'fw-500'},ord.id),h('div',{className:'order-id'},'Room ',ord.room,' · ',ord.time)),
+        h('span',{className:`order-status ${statusColors[ord.status]||''}`},ord.status.charAt(0).toUpperCase()+ord.status.slice(1))
+      ),
+      h('div',{className:'order-items'},ord.items.map(i=>`${i.name} ×${i.qty}`).join(' · ')),
+      h('div',{className:'order-footer'},
+        h('span',{className:'order-total'},'₹',ord.total*80+(ord.total*80*0.05|0)+50),
+        h('span',{className:'order-time'},
+          ord.status==='pending'?'⏳ Being confirmed...':
+          ord.status==='preparing'?'👨‍🍳 Chef is preparing...':
+          ord.status==='ready'?'🛎 On the way to your room!':
+          '✅ Delivered'
+        )
+      )
+    ))
+  );
+}
+
+/* LOGIN */
+function LoginPage(){
+  const{login,setPage}=useApp();
+  const[email,setEmail]=useState('');
+  const[pass,setPass]=useState('');
+  const[err,setErr]=useState('');
+  function submit(e){
+    e.preventDefault();
+    if(!login(email,pass))setErr('Invalid email or password');
+  }
+  return h('div',{className:'auth-wrap'},
+    h('div',{className:'auth-card'},
+      h('h2',{className:'auth-title'},'Welcome Back'),
+      h('p',{className:'auth-sub'},'Sign in to your room account'),
+      err&&h('div',{className:'error-msg'},err),
+      h('form',{onSubmit:submit},
+        h('div',{className:'form-group'},
+          h('label',{className:'form-label'},'Email Address'),
+          h('input',{className:'form-input',type:'email',value:email,onChange:e=>setEmail(e.target.value),required:true,placeholder:'your@email.com'})
+        ),
+        h('div',{className:'form-group'},
+          h('label',{className:'form-label'},'Password'),
+          h('input',{className:'form-input',type:'password',value:pass,onChange:e=>setPass(e.target.value),required:true,placeholder:'••••••••'})
+        ),
+        h('button',{className:'btn btn-primary w-full',style:{padding:'0.8rem'}},'Sign In')
+      ),
+      h('div',{className:'auth-divider'},'or'),
+      h('p',{style:{textAlign:'center',fontSize:'0.875rem'}},
+        "Don't have an account? ",h('span',{className:'auth-link',onClick:()=>setPage('register')},'Register here')
+      ),
+      h('div',{style:{marginTop:'1rem',padding:'0.75rem',background:'var(--cream2)',borderRadius:'var(--radius)',fontSize:'0.78rem',color:'var(--text2)'}},
+        h('p',{className:'fw-500 mb-1'},'Demo Accounts:'),
+        h('p',null,'Guest: james@guest.com / guest123'),
+        h('p',null,'Admin: admin@luxestay.com / admin123')
+      )
+    )
+  );
+}
+
+/* REGISTER */
+function RegisterPage(){
+  const{register,setPage}=useApp();
+  const[form,setForm]=useState({name:'',email:'',password:'',room:''});
+  const[err,setErr]=useState('');
+  function update(k,v){setForm(f=>({...f,[k]:v}));}
+  function submit(e){
+    e.preventDefault();
+    const r=register(form.name,form.email,form.password,form.room);
+    if(!r.ok)setErr(r.msg);
+  }
+  return h('div',{className:'auth-wrap'},
+    h('div',{className:'auth-card'},
+      h('h2',{className:'auth-title'},'Create Account'),
+      h('p',{className:'auth-sub'},'Join LuxeStay dining'),
+      err&&h('div',{className:'error-msg'},err),
+      h('form',{onSubmit:submit},
+        h('div',{className:'form-group'},h('label',{className:'form-label'},'Full Name'),h('input',{className:'form-input',value:form.name,onChange:e=>update('name',e.target.value),required:true,placeholder:'John Smith'})),
+        h('div',{className:'form-group'},h('label',{className:'form-label'},'Email Address'),h('input',{className:'form-input',type:'email',value:form.email,onChange:e=>update('email',e.target.value),required:true,placeholder:'john@example.com'})),
+        h('div',{className:'form-group'},h('label',{className:'form-label'},'Password'),h('input',{className:'form-input',type:'password',value:form.password,onChange:e=>update('password',e.target.value),required:true,placeholder:'Minimum 6 characters',minLength:6})),
+        h('div',{className:'form-group'},h('label',{className:'form-label'},'Room Number'),h('input',{className:'form-input',value:form.room,onChange:e=>update('room',e.target.value),placeholder:'e.g. 204 (optional)'})),
+        h('button',{className:'btn btn-primary w-full',style:{padding:'0.8rem'}},'Create Account')
+      ),
+      h('div',{className:'auth-divider'},'or'),
+      h('p',{style:{textAlign:'center',fontSize:'0.875rem'}},
+        'Already have an account? ',h('span',{className:'auth-link',onClick:()=>setPage('login')},'Sign in')
+      )
+    )
+  );
+}
+
+/* ADMIN PANEL */
+function AdminPage(){
+  const{orders,users,updateOrderStatus}=useApp();
+  const[tab,setTab]=useState('dashboard');
+  const pending=orders.filter(o=>o.status==='pending').length;
+  const today=orders.filter(o=>o.time.startsWith('2024-01-15'));
+  const revenue=today.reduce((s,o)=>s+o.total*80,0);
+  const guests=users.filter(u=>u.role==='guest').length;
+  const links=[['📊','Dashboard','dashboard'],['📋','Orders','orders'],['🍽','Menu Items','menu'],['👥','Guests','guests']];
+  const statusOptions=['pending','preparing','ready','delivered'];
+  return h('div',{className:'admin-layout'},
+    h('div',{className:'admin-sidebar'},
+      h('p',{className:'admin-sidebar-title'},'Navigation'),
+      links.map(([icon,label,key])=>h('div',{key,className:`sidebar-link${tab===key?' active':''}`,onClick:()=>setTab(key)},icon,' ',label))
+    ),
+    h('div',{className:'admin-content'},
+      tab==='dashboard'&&h('div',null,
+        h('h2',{className:'section-title'},'Dashboard'),
+        h('div',{className:'section-line'}),
+        h('div',{className:'admin-stats'},
+          [['Total Orders',orders.length,'Today: '+today.length],['Pending',pending,'Needs attention'],["Today's Revenue",'₹'+revenue.toLocaleString(),''],['Guests',guests,'Active accounts']].map(([l,v,s])=>
+            h('div',{key:l,className:'stat-card'},h('div',{className:'stat-label'},l),h('div',{className:'stat-value'},v),s&&h('div',{className:'stat-sub'},s))
+          )
+        ),
+        h('h3',{style:{fontFamily:'Cormorant Garamond,serif',fontSize:'1.3rem',fontWeight:300,marginBottom:'1rem'}},'Recent Orders'),
+        h('table',{className:'admin-table'},
+          h('thead',null,h('tr',null,['Order ID','Room','Items','Total','Status','Action'].map(t=>h('th',{key:t},t)))),
+          h('tbody',null,orders.slice(0,5).map(o=>h('tr',{key:o.id},
+            h('td',null,h('span',{className:'fw-500'},o.id)),
+            h('td',null,'Room ',o.room),
+            h('td',null,o.items.length,' item(s)'),
+            h('td',null,'₹',o.total*80),
+            h('td',null,h('span',{className:`order-status status-${o.status}`},o.status)),
+            h('td',null,h('select',{className:'status-select',value:o.status,onChange:e=>updateOrderStatus(o.id,e.target.value)},
+              statusOptions.map(s=>h('option',{key:s,value:s},s.charAt(0).toUpperCase()+s.slice(1)))
+            ))
+          )))
+        )
+      ),
+      tab==='orders'&&h('div',null,
+        h('h2',{className:'section-title'},'All Orders'),
+        h('div',{className:'section-line'}),
+        h('table',{className:'admin-table'},
+          h('thead',null,h('tr',null,['Order ID','Room','Time','Items','Total','Status','Update'].map(t=>h('th',{key:t},t)))),
+          h('tbody',null,orders.map(o=>h('tr',{key:o.id},
+            h('td',null,h('span',{className:'fw-500'},o.id)),
+            h('td',null,'Room ',o.room),
+            h('td',null,h('span',{style:{fontSize:'0.78rem'}},o.time)),
+            h('td',null,o.items.map(i=>i.name+' ×'+i.qty).join(', ')),
+            h('td',null,'₹',o.total*80),
+            h('td',null,h('span',{className:`order-status status-${o.status}`},o.status)),
+            h('td',null,h('select',{className:'status-select',value:o.status,onChange:e=>updateOrderStatus(o.id,e.target.value)},
+              statusOptions.map(s=>h('option',{key:s,value:s},s.charAt(0).toUpperCase()+s.slice(1)))
+            ))
+          )))
+        )
+      ),
+      tab==='menu'&&h('div',null,
+        h('h2',{className:'section-title'},'Menu Items'),
+        h('div',{className:'section-line'}),
+        h('table',{className:'admin-table'},
+          h('thead',null,h('tr',null,['Item','Category','Price','Type','Popularity'].map(t=>h('th',{key:t},t)))),
+          h('tbody',null,MENU.map(item=>h('tr',{key:item.id},
+            h('td',null,item.emoji,' ',h('span',{className:'fw-500'},item.name)),
+            h('td',null,item.cat),
+            h('td',null,'₹',item.price*80),
+            h('td',null,h('span',{className:`tag ${item.veg?'tag-veg':'tag-nonveg'}`},item.veg?'Veg':'Non-veg')),
+            h('td',null,item.popular?h('span',{className:'tag tag-popular'},'⭐ Popular'):'–')
+          )))
+        )
+      ),
+      tab==='guests'&&h('div',null,
+        h('h2',{className:'section-title'},'Registered Guests'),
+        h('div',{className:'section-line'}),
+        h('table',{className:'admin-table'},
+          h('thead',null,h('tr',null,['Name','Email','Room','Role','Orders'].map(t=>h('th',{key:t},t)))),
+          h('tbody',null,users.map(u=>h('tr',{key:u.id},
+            h('td',null,h('span',{className:'fw-500'},u.name)),
+            h('td',null,u.email),
+            h('td',null,u.room||'—'),
+            h('td',null,h('span',{className:`tag ${u.role==='admin'?'tag-popular':'tag-veg'}`},u.role)),
+            h('td',null,orders.filter(o=>o.userId===u.id).length)
+          )))
+        )
+      )
+    )
+  );
+}
+
+/* ROUTER */
+function Router(){
+  const{page,user}=useApp();
+  if(!user&&(page==='menu'||page==='cart'||page==='orders'))return h(LoginPage,null);
+  if(page==='admin'&&user?.role!=='admin')return h(HomePage,null);
+  switch(page){
+    case 'login':return h(LoginPage,null);
+    case 'register':return h(RegisterPage,null);
+    case 'menu':return h(MenuPage,null);
+    case 'cart':return h(CartPage,null);
+    case 'orders':return h(OrdersPage,null);
+    case 'admin':return h(AdminPage,null);
+    default:return h(HomePage,null);
+  }
+}
+
+function App(){
+  return h(AppProvider,null,
+    h('div',{id:'app'},
+      h(Navbar,null),
+      h(Router,null),
+      h(Toast,null),
+      h('footer',{style:{background:'var(--dark)',color:'var(--text3)',textAlign:'center',padding:'1.5rem',fontSize:'0.8rem'}},
+        '© 2024 LuxeStay Hotels · ',h('span',{style:{color:'var(--gold)'}},'Crafted with ♥ for Exceptional Guests')
+      )
+    )
+  );
+}
+ReactDOM.createRoot(document.getElementById('app')).render(h(App,null));
+</script>
+</body>
+</html>
